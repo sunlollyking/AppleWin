@@ -21,6 +21,12 @@ namespace
 
     const std::string SAVEDISK_LABEL("Save Disk ");
 
+    // Game disks are write-protected unless the option says to follow the image file
+    bool gameDiskWriteProtection()
+    {
+        return ra2::getFloppyWriteProtect() ? IMAGE_FORCE_WRITE_PROTECTED : IMAGE_USE_FILES_WRITE_PROTECT_STATUS;
+    }
+
     bool startsWith(const std::string &value, const std::string &prefix)
     {
         if (prefix.size() > value.size())
@@ -93,7 +99,7 @@ namespace ra2
 
     bool DiskControl::insertDisk(const Drive_e drive, const std::string &path)
     {
-        const bool writeProtected = IMAGE_FORCE_WRITE_PROTECTED;
+        const bool writeProtected = gameDiskWriteProtection();
         const bool createIfNecessary = IMAGE_DONT_CREATE;
 
         if (insertFloppyDisk(drive, path, writeProtected, createIfNecessary))
@@ -182,7 +188,7 @@ namespace ra2
                 {
                     imagePath = parent / imagePath;
                 }
-                myImages.push_back({imagePath.string(), label, IMAGE_FORCE_WRITE_PROTECTED, IMAGE_DONT_CREATE, false});
+                myImages.push_back({imagePath.string(), label, gameDiskWriteProtection(), IMAGE_DONT_CREATE, false});
             }
         }
 
@@ -354,7 +360,7 @@ namespace ra2
 
             myImages[index].path = filePath.string();
             myImages[index].label = filePath.stem().string();
-            myImages[index].writeProtected = IMAGE_FORCE_WRITE_PROTECTED;
+            myImages[index].writeProtected = gameDiskWriteProtection();
             myImages[index].createIfNecessary = IMAGE_DONT_CREATE;
             return true;
         }
